@@ -27,6 +27,8 @@ public class BlockDiscoveryUtils {
         queue.add(startBlock);
         visited.add(startBlock.getLocation());
 
+        boolean limitReached = false;
+
         while (!queue.isEmpty() && treeBlocks.size() < maxBlocks) {
             Block current = queue.poll();
             Location loc = current.getLocation();
@@ -50,9 +52,13 @@ public class BlockDiscoveryUtils {
 
             // Add neighbors to queue
             addNeighborsToQueue(current, queue, visited, connectedOnly);
+
+            if (treeBlocks.size() >= maxBlocks) {
+                limitReached = true;
+            }
         }
 
-        if (config.isRequireTreeConnectedToLeaves() && !treeBlocks.isEmpty()) {
+        if (config.isRequireTreeConnectedToLeaves() && !treeBlocks.isEmpty() && !limitReached) {
             if (!isTreeConnectedToLeaves(treeBlocks, config)) {
                 Set<Location> singleLog = new HashSet<>();
                 singleLog.add(startBlock.getLocation());
@@ -61,6 +67,51 @@ public class BlockDiscoveryUtils {
         }
 
         return treeBlocks;
+    }
+
+    public static boolean hasLeafConnection(
+            Block startBlock,
+            Config config,
+            boolean connectedOnly,
+            Player player,
+            ProtectionCheckUtils.ProtectionHooks hooks) {
+
+        Queue<Block> queue = new LinkedList<>();
+        Set<Location> visited = new HashSet<>();
+
+        Material originalType = startBlock.getType();
+        int maxBlocks = config.getMaxDiscoveryBlocks();
+        int processedBlocks = 0;
+
+        queue.add(startBlock);
+        visited.add(startBlock.getLocation());
+
+        while (!queue.isEmpty() && processedBlocks < maxBlocks) {
+            Block current = queue.poll();
+            processedBlocks++;
+
+            Location loc = current.getLocation();
+
+            if (!ProtectionCheckUtils.canModifyBlock(player, loc, hooks)) {
+                continue;
+            }
+
+            if (!isLog(current.getType(), config)) {
+                continue;
+            }
+
+            if (config.isStopChoppingIfDifferentTypes() && current.getType() != originalType) {
+                continue;
+            }
+
+            if (hasAdjacentLeaf(current, config)) {
+                return true;
+            }
+
+            addNeighborsToQueue(current, queue, visited, connectedOnly);
+        }
+
+        return processedBlocks >= maxBlocks;
     }
 
     public static Set<Block> discoverLeavesBFS(
@@ -219,14 +270,14 @@ public class BlockDiscoveryUtils {
     private static boolean isTreeConnectedToLeaves(Set<Location> treeBlocks, Config config) {
         for (Location location : treeBlocks) {
             Block block = location.getBlock();
-            if (block != null && isAdjacentToLeaf(block, config)) {
+            if (block != null && hasAdjacentLeaf(block, config)) {
                 return true;
             }
         }
         return false;
     }
 
-    private static boolean isAdjacentToLeaf(Block block, Config config) {
+    public static boolean hasAdjacentLeaf(Block block, Config config) {
         for (int x = -1; x <= 1; x++) {
             for (int y = -1; y <= 1; y++) {
                 for (int z = -1; z <= 1; z++) {

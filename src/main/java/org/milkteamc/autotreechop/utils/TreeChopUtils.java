@@ -120,6 +120,9 @@ public class TreeChopUtils {
         UUID playerUUID = player.getUniqueId();
 
         Map<Material, Location> logTypesForReplant = new HashMap<>();
+        boolean skipReplantForIsolatedLog = config.isRequireTreeConnectedToLeaves()
+                && blockList.size() == 1
+                && !BlockDiscoveryUtils.hasAdjacentLeaf(originalBlock, config);
 
         batchProcessor.processBatch(
                 blockList,
@@ -132,8 +135,10 @@ public class TreeChopUtils {
                         return;
                     }
 
-                    Material originalLogType = block.getType();
-                    logTypesForReplant.putIfAbsent(originalLogType, location);
+                    if (!skipReplantForIsolatedLog) {
+                        Material originalLogType = block.getType();
+                        logTypesForReplant.putIfAbsent(originalLogType, location);
+                    }
 
                     if (config.isCallBlockBreakEvent()) {
                         BlockBreakEvent breakEvent = new BlockBreakEvent(block, player);
@@ -170,7 +175,7 @@ public class TreeChopUtils {
                         }
                     }
 
-                    if (TreeReplantUtils.isReplantEnabledForPlayer(player, config)) {
+                    if (!skipReplantForIsolatedLog && TreeReplantUtils.isReplantEnabledForPlayer(player, config)) {
                         for (Map.Entry<Material, Location> entry : logTypesForReplant.entrySet()) {
                             Block blockToReplant = entry.getValue().getBlock();
                             TreeReplantUtils.scheduleReplant(

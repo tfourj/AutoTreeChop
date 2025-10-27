@@ -358,6 +358,24 @@ public class AutoTreeChop extends JavaPlugin implements Listener, CommandExecuto
         Material material = block.getType();
 
         if (playerConfig.isAutoTreeChopEnabled() && BlockDiscoveryUtils.isLog(material, config)) {
+            ProtectionHooks hooks = new ProtectionHooks(
+                    worldGuardEnabled, worldGuardHook,
+                    residenceEnabled, residenceHook,
+                    griefPreventionEnabled, griefPreventionHook,
+                    landsEnabled, landsHook
+            );
+
+            if (config.isRequireTreeConnectedToLeaves() &&
+                    !BlockDiscoveryUtils.hasLeafConnection(
+                            block,
+                            config,
+                            config.isStopChoppingIfNotConnected(),
+                            player,
+                            hooks
+                    )) {
+                return;
+            }
+
             if (cooldownManager.isInCooldown(playerUUID)) {
                 sendMessage(player, STILL_IN_COOLDOWN_MESSAGE
                         .insertNumber("cooldown_time", cooldownManager.getRemainingCooldown(playerUUID))
@@ -383,13 +401,6 @@ public class AutoTreeChop extends JavaPlugin implements Listener, CommandExecuto
             }
 
             event.setCancelled(true);
-
-            ProtectionHooks hooks = new ProtectionHooks(
-                    worldGuardEnabled, worldGuardHook,
-                    residenceEnabled, residenceHook,
-                    griefPreventionEnabled, griefPreventionHook,
-                    landsEnabled, landsHook
-            );
 
             treeChopUtils.chopTree(
                     block, player,
