@@ -83,6 +83,8 @@ griefPreventionFlag: Build
 stopChoppingIfNotConnected: false
 # Stop chopping if the blocks are of different types
 stopChoppingIfDifferentTypes: false
+# Require chopped trees to still be connected to leaves to trigger AutoTreeChop
+require-tree-connected-to-leaves: false
 
 # Define which materials can be chop
 # You can add every leaves type or something else as you like

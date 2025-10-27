@@ -52,6 +52,14 @@ public class BlockDiscoveryUtils {
             addNeighborsToQueue(current, queue, visited, connectedOnly);
         }
 
+        if (config.isRequireTreeConnectedToLeaves() && !treeBlocks.isEmpty()) {
+            if (!isTreeConnectedToLeaves(treeBlocks, config)) {
+                Set<Location> singleLog = new HashSet<>();
+                singleLog.add(startBlock.getLocation());
+                return singleLog;
+            }
+        }
+
         return treeBlocks;
     }
 
@@ -200,6 +208,32 @@ public class BlockDiscoveryUtils {
                     Block block = checkLoc.getBlock();
 
                     if (isLog(block.getType(), config) && !isLocationInSet(checkLoc, removedLogs)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean isTreeConnectedToLeaves(Set<Location> treeBlocks, Config config) {
+        for (Location location : treeBlocks) {
+            Block block = location.getBlock();
+            if (block != null && isAdjacentToLeaf(block, config)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isAdjacentToLeaf(Block block, Config config) {
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                for (int z = -1; z <= 1; z++) {
+                    if (x == 0 && y == 0 && z == 0) continue;
+
+                    Block neighbor = block.getRelative(x, y, z);
+                    if (isLeafBlock(neighbor.getType(), config)) {
                         return true;
                     }
                 }

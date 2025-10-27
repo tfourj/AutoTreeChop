@@ -23,6 +23,7 @@ public class Config {
     private int vipCooldownTime;
     private boolean stopChoppingIfNotConnected;
     private boolean stopChoppingIfDifferentTypes;
+    private boolean requireTreeConnectedToLeaves;
     private boolean chopTreeAsync;
     private String residenceFlag;
     private String griefPreventionFlag;
@@ -111,6 +112,7 @@ public class Config {
         maxBlocksPerDay = config.getInt("max-blocks-per-day");
         stopChoppingIfNotConnected = config.getBoolean("stopChoppingIfNotConnected");
         stopChoppingIfDifferentTypes = config.getBoolean("stopChoppingIfDifferentTypes");
+        requireTreeConnectedToLeaves = config.getBoolean("require-tree-connected-to-leaves");
         chopTreeAsync = config.getBoolean("chopTreeAsync");
         residenceFlag = config.getString("residenceFlag");
         griefPreventionFlag = config.getString("griefPreventionFlag");
@@ -207,6 +209,7 @@ public class Config {
         defaultConfig.set("vipCooldownTime", 2);
         defaultConfig.set("stopChoppingIfNotConnected", false);
         defaultConfig.set("stopChoppingIfDifferentTypes", false);
+        defaultConfig.set("require-tree-connected-to-leaves", false);
         defaultConfig.set("chopTreeAsync", true);
         defaultConfig.set("use-player-locale", false);
         defaultConfig.set("useMysql", false);
@@ -299,6 +302,10 @@ public class Config {
 
     public boolean isStopChoppingIfDifferentTypes() {
         return stopChoppingIfDifferentTypes;
+    }
+
+    public boolean isRequireTreeConnectedToLeaves() {
+        return requireTreeConnectedToLeaves;
     }
 
     public boolean isChopTreeAsync() {
