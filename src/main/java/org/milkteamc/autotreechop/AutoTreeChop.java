@@ -355,17 +355,17 @@ public class AutoTreeChop extends JavaPlugin implements Listener, CommandExecuto
             return;
         }
 
-        if (cooldownManager.isInCooldown(playerUUID)) {
-            sendMessage(player, STILL_IN_COOLDOWN_MESSAGE
-                    .insertNumber("cooldown_time", cooldownManager.getRemainingCooldown(playerUUID))
-            );
-            event.setCancelled(true);
-            return;
-        }
-
         Material material = block.getType();
 
         if (playerConfig.isAutoTreeChopEnabled() && BlockDiscoveryUtils.isLog(material, config)) {
+            if (cooldownManager.isInCooldown(playerUUID)) {
+                sendMessage(player, STILL_IN_COOLDOWN_MESSAGE
+                        .insertNumber("cooldown_time", cooldownManager.getRemainingCooldown(playerUUID))
+                );
+                event.setCancelled(true);
+                return;
+            }
+
             if (!PermissionUtils.hasVipBlock(player, playerConfig, config)) {
                 if (playerConfig.getDailyBlocksBroken() >= config.getMaxBlocksPerDay()) {
                     EffectUtils.sendMaxBlockLimitReachedMessage(player, block, HIT_MAX_BLOCK_MESSAGE);
